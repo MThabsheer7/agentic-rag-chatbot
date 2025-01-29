@@ -1,10 +1,17 @@
 import os
 import streamlit as st
 from pathlib import Path
+from app import MultiDocAgent
 
 # Cache folder for saving uploaded documents
 CACHE_FOLDER = "cache"
 os.makedirs(CACHE_FOLDER, exist_ok=True)
+multi_doc_agent = MultiDocAgent()
+
+# Initialize session state for agent if not already set
+if "global_agent" not in st.session_state:
+    st.session_state["global_agent"] = None  # Initially None, to be updated after processing
+
 
 # Function to save uploaded files
 def save_uploaded_file(uploaded_file, document_name):
@@ -19,6 +26,10 @@ def process_documents(doc_name_mapping):
     # Simulate backend processing (replace this with actual backend code)
     for name, path in doc_name_mapping.items():
         st.write(f"Indexing document: {name} at {path}")
+    agent = multi_doc_agent.process_documents(doc_name_mapping)
+    # Store the agent in session state
+    st.session_state["global_agent"] = agent
+    st.session_state["documents_processed"] = True
     st.success("Documents have been successfully indexed and processed.")
 
 # Streamlit UI
@@ -49,7 +60,6 @@ if uploaded_files:
     if st.sidebar.button("Start Processing"):
         if doc_name_mapping:
             process_documents(doc_name_mapping)
-            st.session_state["documents_processed"] = True
         else:
             st.sidebar.error("Please upload documents before processing.")
 
@@ -63,12 +73,11 @@ if "documents_processed" in st.session_state and st.session_state["documents_pro
 
     if st.button("Submit Question"):
         if query:
-            # Replace the following line with a call to your backend for answering questions
-            st.write(f"Processing query: '{query}'")
-            st.write("Documents passed to backend:")
-            st.json(doc_name_mapping)
-            # Simulated backend response
-            st.success("Query processed successfully (replace this with backend output).")
+            if st.session_state["global_agent"]:
+                answer = st.session_state["global_agent"].query(query)
+                st.success(f"{str(answer)}")
+            else:
+                st.error("Error: Document processing failed. Please re-upload and process again.")
         else:
             st.error("Please enter a question.")
 else:
