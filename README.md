@@ -67,10 +67,6 @@ api:
   openai: sk-xxxxxxxxxxxxxxxxxxxx
 ```
 
-## 📸 Screenshots
-
-*(Add screenshots of UI or chat examples if needed)*
-
 ## 🧠 Use Case
 
 This system was built to support document-intensive domains like financial reporting, where users can upload multiple earnings reports or company filings and ask complex, cross-document questions using a single conversational agent.
